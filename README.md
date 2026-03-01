@@ -15,13 +15,14 @@ If your goal is “make smaller local models perform consistently through good s
 
 ```bash
 # Core
-pip install ollamatoolkit
+pip install imyourboyroy-ollama-toolkit
 
 # Full extras (system + file/image + email tooling)
-pip install "ollamatoolkit[full]"
+pip install "imyourboyroy-ollama-toolkit[full]"
 ```
 
 Supported Python versions: **3.10–3.13**.
+Import path remains `ollamatoolkit` after installation.
 
 ---
 
