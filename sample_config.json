@@ -1,0 +1,144 @@
+{
+    "_comment": "OllamaToolkit Complete Configuration - All Available Settings with Defaults",
+    "_version": "1.0.0",
+    "agent": {
+        "model": "ollama/llama3.1:latest",
+        "temperature": 0.0,
+        "base_url": "http://localhost:11434",
+        "api_key": null,
+        "caching": false,
+        "fallbacks": [],
+        "history_limit": 50,
+        "strict_mode": false,
+        "auto_pull": true,
+        "max_tokens": 4096
+    },
+    "models": {
+        "completion": {
+            "primary": "llama3.1:latest",
+            "fallbacks": [
+                "mistral:latest"
+            ],
+            "temperature": 0.0,
+            "max_tokens": 4096,
+            "context_length": null
+        },
+        "vision": {
+            "primary": "llava:latest",
+            "fallbacks": [],
+            "temperature": 0.2,
+            "max_tokens": 1024,
+            "context_length": null
+        },
+        "embedding": {
+            "primary": "nomic-embed-text:latest",
+            "fallbacks": [
+                "mxbai-embed-large:latest"
+            ],
+            "temperature": 0.0,
+            "max_tokens": 512,
+            "context_length": null
+        },
+        "reasoning": {
+            "primary": "qwen3:8b",
+            "fallbacks": [
+                "llama3.1:latest"
+            ],
+            "temperature": 0.7,
+            "max_tokens": 8192,
+            "context_length": null
+        },
+        "tools": {
+            "primary": "llama3.1:latest",
+            "fallbacks": [
+                "mistral:latest"
+            ],
+            "temperature": 0.0,
+            "max_tokens": 4096,
+            "context_length": null
+        }
+    },
+    "tools": {
+        "root_dir": "./workspace",
+        "read_only": false,
+        "allowed_tools": [
+            "files",
+            "math",
+            "server",
+            "db",
+            "system",
+            "web",
+            "vision",
+            "vector",
+            "system_health",
+            "models"
+        ],
+        "custom_tools": [],
+        "mcp_servers": {
+            "_example_webscraper": {
+                "_comment": "Example MCP server configuration",
+                "command": "web-scraper-server",
+                "args": [
+                    "--stdio"
+                ],
+                "env": null
+            }
+        }
+    },
+    "web": {
+        "user_agent": "OllamaToolkit/1.0 (Research)",
+        "timeout": 30,
+        "verify_ssl": true,
+        "proxies": null
+    },
+    "vision": {
+        "model": "ollama/llava:latest",
+        "temperature": 0.2,
+        "max_tokens": 1024,
+        "meta_map": {},
+        "video_sample_interval": 2,
+        "enable_grounding": true,
+        "use_chat_api": true
+    },
+    "vector": {
+        "embedding_model": "ollama/nomic-embed-text:latest",
+        "chunk_size": 500,
+        "chunk_overlap": 50,
+        "storage_path": "./workspace/vector_store.json"
+    },
+    "memory": {
+        "max_messages": 100,
+        "summarize_threshold": 80,
+        "storage_path": null,
+        "auto_save": false
+    },
+    "document": {
+        "default_vision_model": null,
+        "dpi": 150,
+        "min_text_chars": 100,
+        "clean_text": true,
+        "save_images": false
+    },
+    "benchmark": {
+        "unload_wait_time": 3.0,
+        "max_unload_wait": 30.0,
+        "unload_check_interval": 2.0
+    },
+    "logging": {
+        "level": "INFO",
+        "file_path": "agent.log",
+        "verbose": false
+    },
+    "dashboard": {
+        "enabled": false,
+        "refresh_rate_ms": 100,
+        "show_system": true,
+        "show_tools": true,
+        "show_context_usage": true
+    },
+    "telemetry": {
+        "enabled": true,
+        "session_dir": "./logs/sessions",
+        "max_sessions": 100
+    }
+}

@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ollamatoolkit"
+version = "0.2.0"
+description = "A Professional-Grade, Modular Agentic Framework for Ollama & LiteLLM."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "ollama>=0.6.1",
+    "httpx>=0.28.1",
+    "litellm>=1.50.0",
+    "llm-telemetry-toolkit>=0.1.0",
+    "numpy>=2.0.0",
+    "pydantic>=2.12.5",
+    "requests>=2.32.5",
+    "rich>=14.2.0",
+    "web-scraper-toolkit>=0.1.7",
+    "pymupdf>=1.26.7",
+    "pypdf>=6.5.0",
+    "emailtoolkit>=0.1.0",
+]
+
+[project.optional-dependencies]
+system = ["psutil>=7.1.3"]
+files = ["pypdf>=6.4.1", "pdf2image>=1.16.0", "opencv-python-headless>=4.0.0"]
+email = ["emailtoolkit[dns]>=0.1.0"]
+full = ["psutil>=7.1.3", "pypdf>=6.4.1", "pdf2image>=1.16.0", "opencv-python-headless>=4.0.0", "emailtoolkit[dns]>=0.1.0"]
+
+[project.urls]
+Homepage = "https://github.com/imyourboyroy/ollamatoolkit"
+Repository = "https://github.com/imyourboyroy/ollamatoolkit"
+Issues = "https://github.com/imyourboyroy/ollamatoolkit/issues"
+
+[project.scripts]
+ollamatoolkit = "ollamatoolkit.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ollamatoolkit = ["py.typed"]
+
+[tool.mypy]
+python_version = "3.10"
+implicit_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
+pretty = true
+disable_error_code = ["import-untyped", "import-not-found"]

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savanna Schroeder - Resume</title>
+    <!-- Google Fonts: Inter for clean, modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Custom Font Application */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background for web preview */
+            color: #1f2937; /* Dark gray text for readability */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* The Resume Page - A4/Letter size ratio simulation */
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            background: white;
+            margin: 2rem auto;
+            padding: 0.75in; /* Safe printing margins */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        /* Typography Enhancements */
+        h1 { letter-spacing: -0.025em; }
+        h2 { letter-spacing: -0.015em; }
+        
+        .section-header {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.25rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            color: #4b5563;
+            font-weight: 700;
+        }
+
+        /* List Styling */
+        ul.job-bullets li {
+            position: relative;
+            padding-left: 1.25em;
+            margin-bottom: 0.4em;
+            line-height: 1.5;
+            color: #374151;
+        }
+        ul.job-bullets li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #9ca3af;
+            font-weight: bold;
+        }
+
+        /* Controls for the Web Preview */
+        .controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* PRINT STYLES - CRITICAL FOR PDF EXPORT */
+        @media print {
+            body {
+                background: white;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+                height: auto;
+                padding: 0; /* Use browser margins or set minimal here if 'None' is selected */
+            }
+            .controls {
+                display: none !important;
+            }
+            /* Ensure links don't show URLs */
+            a[href]:after {
+                content: none !important;
+            }
+            /* Avoid breaking inside elements */
+            .no-break {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button onclick="window.print()" class="btn">
+            <i class="fas fa-file-pdf"></i> Export as PDF
+        </button>
+    </div>
+
+    <!-- Resume Container -->
+    <div class="page">
+        
+        <!-- Header Section -->
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">SAVANNA SCHROEDER</h1>
+            <div class="flex flex-wrap items-center text-sm text-gray-600 gap-y-2 gap-x-4">
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-map-marker-alt text-gray-400"></i> Salt Lake City, UT
+                </span>
+                <span class="hidden sm:inline text-gray-300">|</span>
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-phone text-gray-400"></i> 801-657-9912
+                </span>
+                <span class="hidden sm:inline text-gray-300">|</span>
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-envelope text-gray-400"></i> savannaschroedersteel@gmail.com
+                </span>
+            </div>
+            <div class="mt-2 text-sm text-blue-700 italic font-medium">
+                Portfolio Available Upon Request
+            </div>
+        </header>
+
+        <!-- Summary -->
+        <section class="mb-8">
+            <h2 class="section-header">Professional Summary</h2>
+            <p class="text-gray-700 leading-relaxed text-sm">
+                Reliable Fabricator and Logistics Specialist with a dual background in precision welding and operations management. Combines a Bachelor of Science in Art & Design with technical trade certification to deliver high-quality metalwork. Proven track record of safety compliance, production efficiency, and organizational excellence.
+            </p>
+        </section>
+
+        <!-- Skills Grid (Optimized for ATS & Humans) -->
+        <section class="mb-8 no-break">
+            <h2 class="section-header">Core Skills</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <!-- Col 1 -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">Fabrication</h3>
+                    <ul class="text-gray-700 space-y-1">
+                        <li>MIG/TIG/Stick Welding</li>
+                        <li>Structural Steel</li>
+                        <li>Custom Jigs & Fixtures</li>
+                        <li>Grinding & Finishing</li>
+                    </ul>
+                </div>
+                <!-- Col 2 -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">Operations</h3>
+                    <ul class="text-gray-700 space-y-1">
+                        <li>Inventory Management</li>
+                        <li>Scheduling & Logistics</li>
+                        <li>Facility Maintenance</li>
+                        <li>Quality Assurance (QA)</li>
+                    </ul>
+                </div>
+                <!-- Col 3 -->
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-1">Technical</h3>
+                    <ul class="text-gray-700 space-y-1">
+                        <li>Blueprint Reading</li>
+                        <li>Shop Safety Protocols</li>
+                        <li>AutoCAD (Basic)</li>
+                        <li>Power Tools</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience -->
+        <section class="mb-8">
+            <h2 class="section-header">Technical Trades Experience</h2>
+
+            <!-- Job 1 -->
+            <div class="mb-5 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Custom Fabricator & Welder</h3>
+                    <span class="text-sm font-medium text-gray-500">April 2025 – Present</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">SugarPost Metal | Salt Lake City, UT</div>
+                <ul class="job-bullets text-sm">
+                    <li>Fabricate custom metal art pieces and branded products, utilizing production jigs to ensure consistent quality and output.</li>
+                    <li>Collaborate on complex interior and exterior installations, ensuring precise adherence to design specifications.</li>
+                    <li>Develop new production jigs to improve shop efficiency, reducing assembly time for high-volume parts.</li>
+                    <li>Support installation teams with on-site assembly and structural setup.</li>
+                </ul>
+            </div>
+
+            <!-- Job 2 -->
+            <div class="mb-5 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Production Welder</h3>
+                    <span class="text-sm font-medium text-gray-500">Nov 2024 – April 2025</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">Dragon Products | Salt Lake City, UT</div>
+                <ul class="job-bullets text-sm">
+                    <li>Executed high-quality welds for production parts, strictly adhering to safety guidelines and engineering specs.</li>
+                    <li>Prepared materials for assembly, including shaping, grinding, and rounding components to required dimensions.</li>
+                    <li>Maintained a 100% safety record while ensuring shop cleanliness and tool organization.</li>
+                </ul>
+            </div>
+
+            <!-- Job 3 -->
+            <div class="mb-2 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Welder / Fabricator</h3>
+                    <span class="text-sm font-medium text-gray-500">Jan 2024 – July 2024</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">KMK Manufacturing | Salt Lake City, UT</div>
+                <ul class="job-bullets text-sm">
+                    <li>Welded structural steel beams and fabricated custom repair solutions for heavy trucks, trailers, and farm equipment.</li>
+                    <li>Performed detailed interior and exterior finish work, meeting precise client standards.</li>
+                    <li>Collaborated with the team to troubleshoot fabrication challenges and maintain project timelines.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Logistics Experience -->
+        <section class="mb-8">
+            <h2 class="section-header">Logistics & Operations Experience</h2>
+
+            <!-- Job 4 -->
+            <div class="mb-5 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Private Estate Coordinator</h3>
+                    <span class="text-sm font-medium text-gray-500">Jan 2019 – Nov 2024</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">Self-Employed | Salt Lake City, UT</div>
+                <ul class="job-bullets text-sm">
+                    <li><strong>Facility Management:</strong> Managed maintenance schedules and deep-clean organization for multiple client properties.</li>
+                    <li><strong>Logistics:</strong> Independently managed client accounts, scheduling, and billing with a focus on reliability and retention.</li>
+                    <li><strong>Organization:</strong> Implemented decluttering systems to improve functional workflow for residential clients.</li>
+                </ul>
+            </div>
+
+            <!-- Job 5 -->
+            <div class="mb-5 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Family Logistics Manager</h3>
+                    <span class="text-sm font-medium text-gray-500">Jan 2013 – Aug 2022</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">Self-Employed | Salt Lake City, UT</div>
+                <ul class="job-bullets text-sm">
+                    <li>Oversaw daily household operations including complex scheduling, transportation, and meal planning for five individuals.</li>
+                    <li>Provided crisis management and care, demonstrating high reliability in a demanding environment.</li>
+                </ul>
+            </div>
+
+            <!-- Job 6 -->
+            <div class="mb-2 no-break">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-lg font-bold text-gray-900">Event Logistics Coordinator (Volunteer)</h3>
+                    <span class="text-sm font-medium text-gray-500">Sep 2013 – Dec 2018</span>
+                </div>
+                <div class="text-sm text-gray-700 font-semibold mb-2">UTCX & Local Community</div>
+                <ul class="job-bullets text-sm">
+                    <li><strong>Event Setup:</strong> Coordinated setup and breakdown of registration booths, stages, and sound systems for large-scale race events.</li>
+                    <li><strong>Operations Support:</strong> Managed registration queues and participant flow to ensure smooth event execution.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Education -->
+        <section class="no-break">
+            <h2 class="section-header">Education & Certifications</h2>
+            <div class="flex flex-col space-y-3">
+                
+                <div class="flex justify-between items-baseline">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm">Welding Certification</h3>
+                        <div class="text-gray-600 text-sm">Salt Lake Community College</div>
+                    </div>
+                    <div class="text-sm text-gray-500">Feb 2022 – Oct 2023</div>
+                </div>
+
+                <div class="flex justify-between items-baseline">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm">B.S., Art and Design</h3>
+                        <div class="text-gray-600 text-sm">Utah Valley University</div>
+                    </div>
+                    <div class="text-sm text-gray-500">Aug 2017 – May 2021</div>
+                </div>
+
+                <div class="flex justify-between items-baseline">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm">A.A.S., General Studies</h3>
+                        <div class="text-gray-600 text-sm">Salt Lake Community College</div>
+                    </div>
+                    <div class="text-sm text-gray-500">Aug 2017 – Aug 2019</div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>
