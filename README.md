@@ -15,10 +15,10 @@ If your goal is “make smaller local models perform consistently through good s
 
 ```bash
 # Core
-pip install imyourboyroy-ollama-toolkit
+pip install roy-ollama-toolkit
 
 # Full extras (system + file/image + email tooling)
-pip install "imyourboyroy-ollama-toolkit[full]"
+pip install "roy-ollama-toolkit[full]"
 ```
 
 Supported Python versions: **3.10–3.13**.

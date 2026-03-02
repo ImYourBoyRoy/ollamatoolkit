@@ -87,5 +87,6 @@ REFERENCE_ONLY/
 debug_*.html
 debug_*.png
 ollamatoolkit-*/
+*_ollama_toolkit-*/
 proxy_account_config.json
 socks5_proxies.json
