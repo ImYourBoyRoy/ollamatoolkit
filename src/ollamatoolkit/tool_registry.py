@@ -483,14 +483,14 @@ class ToolRegistry:
         # validate_json
         self.register(
             name="validate_json",
-            function=lambda data, json_schema: schema.validate(
-                data, json_schema
-            ).to_dict()
-            if hasattr(schema.validate(data, json_schema), "to_dict")
-            else {
-                "valid": schema.validate(data, json_schema).valid,
-                "errors": schema.validate(data, json_schema).errors,
-            },
+            function=lambda data, json_schema: (
+                schema.validate(data, json_schema).to_dict()
+                if hasattr(schema.validate(data, json_schema), "to_dict")
+                else {
+                    "valid": schema.validate(data, json_schema).valid,
+                    "errors": schema.validate(data, json_schema).errors,
+                }
+            ),
             description="Validate JSON data against a JSON schema. Returns validity and errors.",
             parameters={
                 "type": "object",
