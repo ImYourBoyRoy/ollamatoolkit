@@ -1,31 +1,24 @@
-# ./ollamatoolkit/cli.py
+# ./src/ollamatoolkit/cli.py
 """
-Ollama Toolkit - CLI Runner
-===========================
-Entry point for running agents via command line.
-Supports configuration loading, dynamic tool registration, and interactive mode.
+Ollama Toolkit CLI entrypoint for agent runs, model inspection, and quick chat.
+Run: `python -m ollamatoolkit.cli <command>` or installed `ollamatoolkit` entrypoint.
+Inputs: CLI subcommands, optional config/role files, Ollama base URL, and tool-selection flags.
+Outputs: console responses, model inventory JSON, chat sessions, or agent task results.
+Side effects: may read/write local config/output files, contact Ollama, and initialize optional MCP/tool services.
+Operational notes: imports optional tool families lazily so lightweight commands like `models` avoid vision/system deps.
 """
+
+from __future__ import annotations
 
 import sys
 import argparse
 import logging
+from typing import Any, Callable, Sequence
 
 # Add src to path if running directly
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
-
-from ollamatoolkit.config import ToolkitConfig
-from ollamatoolkit.agents.role import RoleAgent
-from ollamatoolkit.tools.files import FileTools
-from ollamatoolkit.tools.math import MathTools
-from ollamatoolkit.tools.server import OllamaServerTools
-from ollamatoolkit.tools.db import SQLDatabaseTool
-from ollamatoolkit.tools.mcp import MCPToolManager
-from ollamatoolkit.tools.vision import VisionTools
-from ollamatoolkit.tools.vector import VectorTools
-from ollamatoolkit.tools.system import SystemTools
-from ollamatoolkit.tools.web import WebTools
 
 
 def build_parser():
@@ -53,7 +46,17 @@ def build_parser():
     run_parser.add_argument("--model", "-m", help="Override LLM model")
     run_parser.add_argument(
         "--tools",
-        choices=["all", "files", "math", "db", "server", "system", "web", "vision"],
+        choices=[
+            "all",
+            "files",
+            "math",
+            "db",
+            "server",
+            "system",
+            "web",
+            "vision",
+            "vector",
+        ],
         nargs="+",
         help="Enable standard tools",
     )
@@ -90,6 +93,10 @@ def build_parser():
     models_parser.add_argument("--json", action="store_true", help="Output as JSON")
     models_parser.add_argument(
         "--base-url", default="http://localhost:11434", help="Ollama server URL"
+    )
+    models_parser.add_argument(
+        "--benchmarks-file",
+        help="Optional benchmark report JSON to merge into model inspection output.",
     )
 
     # CHAT command (quick interactive mode)
@@ -244,56 +251,66 @@ def run_batch_mode(agent, batch_file: str, output_dir: str):
 def handle_models_command(args):
     """Handle the 'models' CLI command for model discovery."""
     import json as json_module
-    from ollamatoolkit.models.selector import ModelSelector
+    from ollamatoolkit.models.inventory import collect_model_inventory
 
     try:
-        selector = ModelSelector(base_url=args.base_url)
+        payload = collect_model_inventory(
+            base_url=args.base_url,
+            capability=args.capability,
+            benchmarks_file=getattr(args, "benchmarks_file", None),
+        )
     except Exception as e:
         print(f"Error connecting to Ollama at {args.base_url}: {e}")
-        return
-
-    # Filter by capability if specified
-    if args.capability:
-        models = selector.get_models_by_capability(args.capability)
-        model_names = [m.name for m in models]
-    else:
-        model_names = selector.model_names
+        return 1
 
     if args.json:
-        # JSON output
-        output = {
-            "total_models": len(model_names),
-            "models": [],
-        }
-        for name in model_names:
-            info = selector.get_model(name)
-            if info:
-                output["models"].append(
-                    {
-                        "name": info.name,
-                        "family": info.family,
-                        "size": info.parameter_size,
-                        "capabilities": info.capabilities,
-                        "quantization": info.quantization,
-                    }
-                )
-        print(json_module.dumps(output, indent=2))
+        print(json_module.dumps(payload, indent=2))
     else:
-        # Table output
         print(f"\n{'Model':<40} {'Family':<15} {'Size':<10} {'Capabilities'}")
         print("-" * 90)
-        for name in model_names:
-            info = selector.get_model(name)
-            if info:
-                caps = ", ".join(info.capabilities)
-                print(
-                    f"{info.name:<40} {info.family:<15} {info.parameter_size:<10} {caps}"
-                )
-        print(f"\nTotal: {len(model_names)} models")
-
-        # Show summary
-        summary = selector.summary()
-        print(f"\nCapabilities: {', '.join(summary['by_capability'].keys())}")
+        for row in payload.get("models", []):
+            if not isinstance(row, dict):
+                continue
+            caps = ", ".join(
+                str(item)
+                for item in row.get("capabilities", [])
+                if isinstance(item, str)
+            )
+            running_suffix = " *running" if bool(row.get("running", False)) else ""
+            print(
+                f"{str(row.get('name', '')):<40} "
+                f"{str(row.get('family', '')):<15} "
+                f"{str(row.get('size', '')):<10} "
+                f"{caps}{running_suffix}"
+            )
+        print(f"\nTotal: {int(payload.get('total_models', 0) or 0)} models")
+        running_rows = payload.get("running_models", [])
+        if isinstance(running_rows, list) and running_rows:
+            print("\nRunning:")
+            for row in running_rows:
+                if not isinstance(row, dict):
+                    continue
+                print(f"  - {row.get('name', '')}")
+        recommended = payload.get("recommended", {})
+        if isinstance(recommended, dict):
+            print("\nRecommended:")
+            for use_case, model_name in recommended.items():
+                if not model_name:
+                    continue
+                print(f"  - {use_case}: {model_name}")
+        benchmark_summary = payload.get("benchmark_summary", {})
+        if isinstance(benchmark_summary, dict) and benchmark_summary.get("available"):
+            print(f"\nBenchmarks: {benchmark_summary.get('path', '')}")
+            roles = benchmark_summary.get("roles", {})
+            if isinstance(roles, dict):
+                for role_name, row in roles.items():
+                    if not isinstance(row, dict):
+                        continue
+                    print(
+                        f"  - {role_name}: {row.get('model', '')} "
+                        f"({row.get('elapsed_seconds', 'n/a')}s)"
+                    )
+    return 0
 
 
 def handle_chat_command(args):
@@ -345,34 +362,38 @@ def handle_chat_command(args):
             break
 
 
-def main():
+def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args()
-
-    # 1. Load Configuration
-    cfg = ToolkitConfig.load(args.config)  # Loads defaults or file
+    args = parser.parse_args(list(argv) if argv is not None else None)
 
     # Handle Config Init
     if args.command == "config":
+        from ollamatoolkit.config import ToolkitConfig
+
+        cfg = ToolkitConfig.load(None)
         if args.init:
             cfg.save_sample()
             print("Created sample_config.json")
-        return
-
-    # Handle Overrides
-    if args.command == "run":
-        if args.model:
-            cfg.agent.model = args.model
+        return 0
 
     # Handle MODELS command
     if args.command == "models":
-        handle_models_command(args)
-        return
+        return int(handle_models_command(args) or 0)
 
     # Handle CHAT command
     if args.command == "chat":
         handle_chat_command(args)
-        return
+        return 0
+
+    from ollamatoolkit.agents.role import RoleAgent
+    from ollamatoolkit.config import ToolkitConfig
+
+    # 1. Load Configuration (run command only)
+    cfg = ToolkitConfig.load(getattr(args, "config", None))
+
+    # Handle Overrides
+    if args.model:
+        cfg.agent.model = args.model
 
     # Configure Logging
     logging.basicConfig(
@@ -384,10 +405,10 @@ def main():
     path = Path(args.role_file)
     if not path.exists():
         print(f"Error: Role file '{path}' not found.")
-        sys.exit(1)
+        return 1
 
     # 2. Setup Tool Registry
-    registry = {}
+    registry: dict[str, Callable[..., Any]] = {}
 
     # Determine allowed tools
     # If valid args.tools passed, use intersection. Else use config.
@@ -395,13 +416,15 @@ def main():
     if args.tools and "all" not in args.tools:
         allowed = allowed.intersection(set(args.tools))
     elif args.tools and "all" in args.tools:
-        allowed = {"files", "math", "server", "db", "system", "web"}
+        allowed = {"files", "math", "server", "db", "system", "web", "vision", "vector"}
 
     selected_tools = list(allowed)
     print(f"Enabled Tools: {selected_tools}")
 
     # Initialize Standard Tools
     if "files" in selected_tools:
+        from ollamatoolkit.tools.files import FileTools
+
         ft = FileTools(cfg.tools.root_dir, cfg.tools.read_only)
         registry["read_file"] = ft.read_file
         registry["write_file"] = ft.write_file
@@ -409,21 +432,29 @@ def main():
         registry["file_exists"] = ft.file_exists
 
     if "math" in selected_tools:
+        from ollamatoolkit.tools.math import MathTools
+
         registry["calculate"] = MathTools.calculate
 
     if "system" in selected_tools:
+        from ollamatoolkit.tools.system import SystemTools
+
         registry["get_current_time"] = SystemTools.get_current_time
         registry["get_system_report"] = SystemTools.get_system_report
         registry["monitor_resources"] = SystemTools.monitor_resources
         registry["wait_seconds"] = SystemTools.wait_seconds
 
     if "web" in selected_tools:
+        from ollamatoolkit.tools.web import WebTools
+
         # Instantiate with config
         web = WebTools(cfg.web)
         registry["fetch_url"] = web.fetch_url
         registry["post_data"] = web.post_data
 
     if "vision" in selected_tools:
+        from ollamatoolkit.tools.vision import VisionTools
+
         vis = VisionTools(cfg.vision, cfg.agent.base_url)
         registry["analyze_image"] = vis.analyze_image
         registry["analyze_video"] = vis.analyze_video
@@ -434,18 +465,24 @@ def main():
         registry["describe_scene"] = vis.describe_scene
 
     if "vector" in selected_tools:
+        from ollamatoolkit.tools.vector import VectorTools
+
         vec = VectorTools(cfg.vector)
         registry["ingest_text"] = vec.ingest_text
         registry["ingest_file"] = vec.ingest_file
         registry["search_memory"] = vec.search_memory
 
     if "server" in selected_tools:
+        from ollamatoolkit.tools.server import OllamaServerTools
+
         srv = OllamaServerTools(cfg.agent.base_url)
         registry["list_models"] = srv.list_models
         registry["pull_model"] = srv.pull_model
         registry["show_model_info"] = srv.show_model_info
 
     if "db" in selected_tools:
+        from ollamatoolkit.tools.db import SQLDatabaseTool
+
         if not args.db_path:
             print(
                 "Warning: DB tools requested but --db-path not provided. Using :memory:"
@@ -479,12 +516,6 @@ def main():
             except Exception as e:
                 print(f"Error loading custom tool '{tool_path}': {e}")
 
-    if "system" in selected_tools:
-        registry["get_current_time"] = SystemTools.get_current_time
-        registry["get_system_report"] = SystemTools.get_system_report
-        registry["monitor_resources"] = SystemTools.monitor_resources
-        registry["wait_seconds"] = SystemTools.wait_seconds
-
     # Native WebTools disabled in favor of WebScraperToolkit MCP
     # if "web" in selected_tools:
     #     # Instantiate with config
@@ -495,6 +526,8 @@ def main():
     # MCP Servers
     mcp_manager = None
     if cfg.tools.mcp_servers:
+        from ollamatoolkit.tools.mcp import MCPToolManager
+
         print(f"Initializing MCP Servers: {list(cfg.tools.mcp_servers.keys())}")
         mcp_manager = MCPToolManager(cfg.tools.mcp_servers)
         mcp_manager.start_all()
@@ -535,11 +568,11 @@ def main():
                 print(
                     "Error: Dashboard requires 'rich'. Install with 'pip install ollamatoolkit[full]' or 'pip install rich'."
                 )
-                sys.exit(1)
+                return 1
 
             if not args.task:
                 print("Error: Dashboard mode currently requires --task.")
-                sys.exit(1)
+                return 1
 
             from ollamatoolkit.dashboard import DashboardRunner
 
@@ -588,7 +621,7 @@ def main():
                 print(
                     "Error: --task is required unless --interactive or --batch-file is set."
                 )
-                sys.exit(1)
+                return 1
 
             print(f"Task: {args.task}")
             if hasattr(args, "streaming") and args.streaming:
@@ -609,7 +642,8 @@ def main():
         if mcp_manager:
             print("Shutting down MCP servers...")
             mcp_manager.shutdown()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -14,6 +14,7 @@ import os
 import platform
 from importlib import metadata
 from inspect import Parameter, Signature, getdoc, signature
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -27,10 +28,32 @@ from typing import (
 
 from ollamatoolkit.types import Message, Tool
 
-try:
-    PACKAGE_VERSION = metadata.version("ollamatoolkit")
-except metadata.PackageNotFoundError:
-    PACKAGE_VERSION = "0.2.0"
+
+def _resolve_package_version() -> str:
+    """Resolve the installed or local source version for User-Agent headers."""
+    for distribution_name in ("roy-ollama-toolkit", "ollamatoolkit"):
+        try:
+            return metadata.version(distribution_name)
+        except metadata.PackageNotFoundError:
+            continue
+
+    pyproject = Path(__file__).resolve().parents[3] / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            import tomllib
+
+            data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+            project = data.get("project", {})
+            version = project.get("version")
+            if isinstance(version, str) and version.strip():
+                return version.strip()
+        except Exception:
+            pass
+
+    return "0.0.0"
+
+
+PACKAGE_VERSION = _resolve_package_version()
 
 
 def parse_host(host: Optional[str]) -> str:

@@ -1,4 +1,4 @@
-# ./ollamatoolkit/tools/web.py
+# ./src/ollamatoolkit/tools/web.py
 """
 Ollama Toolkit - Web Tools
 ==========================
@@ -16,6 +16,8 @@ Requirements:
 import logging
 from pathlib import Path
 from typing import Any, Dict, List
+
+import httpx
 
 from ollamatoolkit.config import WebToolConfig
 
@@ -65,6 +67,50 @@ class WebTools:
         except Exception as e:
             logger.error(f"Scrape failed for {url}: {e}")
             return {"success": False, "error": str(e), "url": url}
+
+    async def fetch_url(self, url: str) -> str:
+        """Backwards-compatible alias that returns scraped page markdown as text."""
+        result = await self.scrape_url(url)
+        if result.get("success"):
+            return str(result.get("markdown") or "")
+        return f"Error: {result.get('error', 'Unknown error')}"
+
+    async def post_data(
+        self,
+        url: str,
+        data: Dict[str, Any],
+        headers: Dict[str, str] | None = None,
+    ) -> Dict[str, Any]:
+        """Submit JSON data to a URL and return a bounded response payload."""
+        request_headers = {"User-Agent": self.config.user_agent, **(headers or {})}
+        try:
+            async with httpx.AsyncClient(
+                timeout=float(self.config.timeout),
+                verify=self.config.verify_ssl,
+                headers=request_headers,
+                follow_redirects=True,
+            ) as client:
+                response = await client.post(url, json=data)
+                response.raise_for_status()
+        except Exception as e:
+            logger.error(f"POST failed for {url}: {e}")
+            return {"success": False, "error": str(e), "url": url}
+
+        content_type = response.headers.get("content-type", "")
+        payload: Dict[str, Any] = {
+            "success": True,
+            "url": str(response.url),
+            "status_code": response.status_code,
+            "headers": dict(response.headers),
+        }
+        if "application/json" in content_type.lower():
+            try:
+                payload["json"] = response.json()
+            except Exception:
+                payload["text"] = response.text[:10000]
+        else:
+            payload["text"] = response.text[:10000]
+        return payload
 
     async def scrape_urls(self, urls: List[str]) -> List[Dict[str, Any]]:
         """Scrape multiple URLs concurrently."""

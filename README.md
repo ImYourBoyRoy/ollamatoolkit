@@ -408,3 +408,28 @@ python .\tools\publish_release.py --project .\OllamaToolkit
 **Created by**: Roy Dawson IV  
 **GitHub**: [https://github.com/imyourboyroy](https://github.com/imyourboyroy)  
 **PyPI**: [https://pypi.org/user/ImYourBoyRoy/](https://pypi.org/user/ImYourBoyRoy/)
+
+---
+
+## Lightweight Model Inventory CLI
+
+`ollamatoolkit models` now stays lightweight by lazily importing optional tool families. That means model inspection no longer requires vision extras just to list inventory.
+
+### Inspect installed + running models
+
+```bash
+ollamatoolkit models --base-url http://192.168.1.21:11434 --json
+```
+
+### Merge benchmark context into inventory output
+
+```bash
+ollamatoolkit models --base-url http://192.168.1.21:11434 --benchmarks-file output/_benchmarks/benchmark_report.json --json
+```
+
+The JSON payload now includes:
+- installed inventory
+- running models
+- capability/family summaries
+- recommended models by use-case
+- optional benchmark-role summaries when a benchmark report is provided

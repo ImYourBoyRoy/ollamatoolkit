@@ -31,6 +31,10 @@ import ollama
 
 logger = logging.getLogger(__name__)
 
+_CAPABILITY_ALIASES = {
+    "thinking": "reasoning",
+}
+
 
 class TaskType(Enum):
     """Common task types for model selection."""
@@ -84,6 +88,31 @@ class ModelSelector:
         TaskType.REASONING: ["qwen3", "gemma", "phi"],
         TaskType.OCR: ["deepseek-ocr", "qwen-vl"],
     }
+
+    @staticmethod
+    def _normalize_capabilities(capabilities: List[str]) -> List[str]:
+        """Normalize capability names and expand common aliases."""
+        normalized: List[str] = []
+        for capability in capabilities:
+            candidate = str(capability or "").strip().lower()
+            if not candidate:
+                continue
+            if candidate not in normalized:
+                normalized.append(candidate)
+            alias = _CAPABILITY_ALIASES.get(candidate, "")
+            if alias and alias not in normalized:
+                normalized.append(alias)
+        return normalized
+
+    @staticmethod
+    def _is_chat_suitable(model: ModelInfo) -> bool:
+        """Return False for embeddings/rerankers/OCR models that are poor chat defaults."""
+        name = model.name.lower()
+        family = model.family.lower()
+        blocked_markers = ("embed", "embedding", "reranker", "bge-reranker", "ocr")
+        if any(marker in name or marker in family for marker in blocked_markers):
+            return False
+        return model.size_in_billions >= 1.0
 
     def __init__(self, base_url: str = "http://localhost:11434"):
         """
@@ -161,7 +190,7 @@ class ModelSelector:
                         parameter_count=modelinfo.get("general.parameter_count", 0)
                         if modelinfo
                         else 0,
-                        capabilities=capabilities,
+                        capabilities=self._normalize_capabilities(capabilities),
                         quantization=getattr(details, "quantization_level", "unknown"),
                         context_length=context_length,
                     )
@@ -174,7 +203,7 @@ class ModelSelector:
                         family="unknown",
                         parameter_size="0B",
                         parameter_count=0,
-                        capabilities=["completion"],
+                        capabilities=self._normalize_capabilities(["completion"]),
                         quantization="unknown",
                         context_length=0,
                     )
@@ -241,7 +270,14 @@ class ModelSelector:
 
     def get_models_by_capability(self, capability: str) -> List[ModelInfo]:
         """Get all models with a specific capability."""
-        return [m for m in self._models.values() if capability in m.capabilities]
+        normalized = str(capability or "").strip().lower()
+        normalized_alias = _CAPABILITY_ALIASES.get(normalized, "")
+        return [
+            model
+            for model in self._models.values()
+            if normalized in model.capabilities
+            or normalized_alias in model.capabilities
+        ]
 
     def get_for_capability(
         self, capability: str, prefer_small: bool = True
@@ -345,12 +381,35 @@ class ModelSelector:
     def get_best_chat_model(self) -> Optional[str]:
         """Get the best model for general chat (prefers tools capability)."""
         # Try to get a model with tools
-        model = self.get_for_capability("tools", prefer_small=True)
-        if model:
-            return model
+        tool_candidates = [
+            model
+            for model in self.get_models_by_capability("tools")
+            if self._is_chat_suitable(model)
+        ]
+        if tool_candidates:
+            preferred = [
+                model
+                for model in tool_candidates
+                if any(
+                    family in model.family.lower()
+                    for family in ["qwen", "llama", "mistral", "lfm", "gptoss"]
+                )
+            ]
+            if preferred:
+                tool_candidates = preferred
+            tool_candidates.sort(key=lambda model: model.size_in_billions)
+            return tool_candidates[0].name
 
         # Fall back to any completion model
-        return self.get_for_capability("completion", prefer_small=True)
+        completion_candidates = [
+            model
+            for model in self.get_models_by_capability("completion")
+            if self._is_chat_suitable(model)
+        ]
+        if not completion_candidates:
+            return None
+        completion_candidates.sort(key=lambda model: model.size_in_billions)
+        return completion_candidates[0].name
 
     def get_best_embedding_model(self) -> Optional[str]:
         """Get the best embedding model."""

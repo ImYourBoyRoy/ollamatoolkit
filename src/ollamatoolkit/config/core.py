@@ -1,4 +1,4 @@
-# ./ollamatoolkit/config/core.py
+# ./src/ollamatoolkit/config/core.py
 """
 Ollama Toolkit - Core Configuration
 ===================================
@@ -365,6 +365,17 @@ class ToolkitConfig:
             json.dump(self.to_dict(), f, indent=4)
 
         logger.info(f"Saved config to {path}")
+
+    def save_sample(self, path: Union[str, Path] = "sample_config.json") -> None:
+        """Backwards-compatible alias for saving a default/sample config file."""
+        self.save(path)
+
+    @classmethod
+    def create_default_sample_file(
+        cls, path: Union[str, Path] = "sample_config.json"
+    ) -> None:
+        """Create a sample config file populated with default values."""
+        cls().save(path)
 
     def get_model_for_task(self, task_type: str) -> str:
         """

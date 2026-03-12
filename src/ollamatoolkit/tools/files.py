@@ -51,6 +51,10 @@ class FileTools:
         except Exception as e:
             return f"Error reading text: {e}"
 
+    def read_file(self, path: str) -> str:
+        """Backwards-compatible alias for reading plain-text files."""
+        return self.read_text(path)
+
     def write_text(self, path: str, content: str, overwrite: bool = False) -> str:
         """Writes plain text to a file."""
         try:
@@ -64,6 +68,10 @@ class FileTools:
             return f"Success: Wrote to {path}"
         except Exception as e:
             return f"Error writing text: {e}"
+
+    def write_file(self, path: str, content: str, overwrite: bool = False) -> str:
+        """Backwards-compatible alias for writing plain-text files."""
+        return self.write_text(path, content, overwrite=overwrite)
 
     def append_text(self, path: str, content: str) -> str:
         """Appends text to a file."""
@@ -168,6 +176,11 @@ class FileTools:
             return "\n".join(items) if items else "(Empty)"
         except Exception as e:
             return f"Error listing directory: {e}"
+
+    def file_exists(self, path: str) -> bool:
+        """Return whether a path exists inside the configured root directory."""
+        target = self._validate_path(path)
+        return target.exists()
 
     # --- Search Operations ---
     def find_files(

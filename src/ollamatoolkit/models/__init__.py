@@ -1,21 +1,14 @@
-# ./ollamatoolkit/models/__init__.py
+# ./src/ollamatoolkit/models/__init__.py
 """
-Ollama Toolkit - Model Utilities
-================================
-Tools for model inspection, selection, and management.
-
-Main Components:
-- ModelSelector: Smart auto-selection based on task requirements
-- ModelInspector: Detailed model capability inspection
-- ModelBenchmark: Performance benchmarking
-
-Usage:
-    from ollamatoolkit.models import ModelSelector, ModelInspector
-
-    selector = ModelSelector()
-    vision_model = selector.get_for_capability("vision")
+Model inspection, selection, and benchmarking exports for OllamaToolkit.
+Run via imports from CLI/operator tooling; no standalone CLI entrypoint.
+Inputs: package imports requesting selectors, inventory helpers, or benchmark utilities.
+Outputs: stable model utility symbols for installed/running inventory and smart selection.
+Side effects: may import optional benchmark/model helper modules but avoids runtime CLI behavior changes.
+Operational notes: keep exports additive and lightweight for inventory-oriented workflows.
 """
 
+from .inventory import collect_model_inventory
 from .selector import ModelSelector, ModelInfo, TaskType
 
 # Re-export from tools for backwards compatibility
@@ -26,6 +19,7 @@ __all__ = [
     "ModelSelector",
     "ModelInfo",
     "TaskType",
+    "collect_model_inventory",
     "ModelInspector",
     "ModelBenchmark",
 ]

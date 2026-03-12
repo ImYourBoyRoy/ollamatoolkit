@@ -12,6 +12,8 @@ Quick Start:
     response = client.generate("llama2", "Hello!")
 """
 
+__version__ = "0.2.3"
+
 # Core Components
 from .agents.simple import SimpleAgent, AgentHooks
 from .agents.role import RoleAgent
@@ -86,6 +88,7 @@ from .models.selector import ModelSelector, ModelInfo
 from .tool_registry import ToolRegistry, ToolResult, ToolDefinition
 
 __all__ = [
+    "__version__",
     # Agents
     "SimpleAgent",
     "RoleAgent",
