@@ -64,6 +64,9 @@ class SyncInferenceAPI:
         think: Optional[Union[bool, Literal["low", "medium", "high"], str]] = None,
         logprobs: Optional[bool] = None,
         top_logprobs: Optional[int] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        steps: Optional[int] = None,
     ) -> Union[GenerateResponse, Iterator[GenerateResponse]]:
         """Call `/api/generate` with typed request/response handling."""
         request = GenerateRequest(
@@ -82,6 +85,9 @@ class SyncInferenceAPI:
             think=think,
             logprobs=logprobs,
             top_logprobs=top_logprobs,
+            width=width,
+            height=height,
+            steps=steps,
         )
         payload = request.model_dump(exclude_none=True)
 
@@ -188,6 +194,23 @@ class SyncInferenceAPI:
                     done=bool(chunk.done),
                     raw_chunk=chunk.model_dump(exclude_none=True),
                 )
+            if chunk.image:
+                yield StreamEvent(
+                    event="image",
+                    chunk_index=index,
+                    image=chunk.image,
+                    done=bool(chunk.done),
+                    raw_chunk=chunk.model_dump(exclude_none=True),
+                )
+            if chunk.completed is not None or chunk.total is not None:
+                yield StreamEvent(
+                    event="progress",
+                    chunk_index=index,
+                    completed=chunk.completed,
+                    total=chunk.total,
+                    done=bool(chunk.done),
+                    raw_chunk=chunk.model_dump(exclude_none=True),
+                )
             if chunk.done:
                 yield StreamEvent(
                     event="done",
@@ -260,6 +283,9 @@ class AsyncInferenceAPI:
         think: Optional[Union[bool, Literal["low", "medium", "high"], str]] = None,
         logprobs: Optional[bool] = None,
         top_logprobs: Optional[int] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        steps: Optional[int] = None,
     ) -> Union[GenerateResponse, AsyncIterator[GenerateResponse]]:
         """Call `/api/generate` asynchronously."""
         request = GenerateRequest(
@@ -278,6 +304,9 @@ class AsyncInferenceAPI:
             think=think,
             logprobs=logprobs,
             top_logprobs=top_logprobs,
+            width=width,
+            height=height,
+            steps=steps,
         )
         payload = request.model_dump(exclude_none=True)
 
@@ -388,6 +417,23 @@ class AsyncInferenceAPI:
                     event="token",
                     chunk_index=index,
                     text=chunk.response,
+                    done=bool(chunk.done),
+                    raw_chunk=chunk.model_dump(exclude_none=True),
+                )
+            if chunk.image:
+                yield StreamEvent(
+                    event="image",
+                    chunk_index=index,
+                    image=chunk.image,
+                    done=bool(chunk.done),
+                    raw_chunk=chunk.model_dump(exclude_none=True),
+                )
+            if chunk.completed is not None or chunk.total is not None:
+                yield StreamEvent(
+                    event="progress",
+                    chunk_index=index,
+                    completed=chunk.completed,
+                    total=chunk.total,
                     done=bool(chunk.done),
                     raw_chunk=chunk.model_dump(exclude_none=True),
                 )

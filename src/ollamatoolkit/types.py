@@ -213,6 +213,12 @@ class GenerateRequest(BaseGenerateRequest):
     think: Optional[Union[bool, Literal["low", "medium", "high"], str]] = None
     logprobs: Optional[bool] = None
     top_logprobs: Optional[int] = None
+    width: Optional[int] = None
+    "Width of the generated image in pixels (for image generation models)."
+    height: Optional[int] = None
+    "Height of the generated image in pixels (for image generation models)."
+    steps: Optional[int] = None
+    "Number of diffusion steps (for image generation models)."
 
 
 class ChatRequest(BaseGenerateRequest):
@@ -355,6 +361,12 @@ class GenerateResponse(BaseGenerateResponse):
     thinking: Optional[str] = None
     context: Optional[Sequence[int]] = None
     logprobs: Optional[Sequence[Logprob]] = None
+    image: Optional[str] = None
+    "Base64-encoded generated image data (for image generation models)."
+    completed: Optional[int] = None
+    "Number of completed diffusion steps (for image generation streaming)."
+    total: Optional[int] = None
+    "Total number of diffusion steps (for image generation streaming)."
 
 
 class ChatResponse(BaseGenerateResponse):
@@ -373,10 +385,13 @@ class EmbedResponse(BaseGenerateResponse):
 class StreamEvent(SubscriptableBaseModel):
     """Structured stream event emitted from streaming helper APIs."""
 
-    event: Literal["token", "thinking", "tool_call", "done"]
+    event: Literal["token", "thinking", "tool_call", "image", "progress", "done"]
     chunk_index: int
     text: Optional[str] = None
     thinking: Optional[str] = None
+    image: Optional[str] = None
+    completed: Optional[int] = None
+    total: Optional[int] = None
     tool_calls: Optional[Sequence[Message.ToolCall]] = None
     done: bool = False
     raw_chunk: Optional[Dict[str, Any]] = None

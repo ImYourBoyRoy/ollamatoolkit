@@ -117,6 +117,9 @@ class OllamaClient:
         think: Optional[Union[bool, str]] = None,
         logprobs: Optional[bool] = None,
         top_logprobs: Optional[int] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        steps: Optional[int] = None,
     ) -> GenerateResponse: ...
 
     @overload
@@ -138,6 +141,9 @@ class OllamaClient:
         think: Optional[Union[bool, str]] = None,
         logprobs: Optional[bool] = None,
         top_logprobs: Optional[int] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        steps: Optional[int] = None,
     ) -> Iterator[GenerateResponse]: ...
 
     def generate(

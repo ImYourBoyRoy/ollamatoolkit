@@ -69,6 +69,50 @@ class TestSyncStreamEvents:
         assert "lo" in token_text
         assert events[-1].event == "done"
 
+    def test_generate_events_image_progress(self) -> None:
+        context = _stream_context(
+            [
+                json.dumps(
+                    {
+                        "model": "flux",
+                        "completed": 5,
+                        "total": 20,
+                        "done": False,
+                    }
+                ),
+                json.dumps(
+                    {
+                        "model": "flux",
+                        "image": "base64data",
+                        "completed": 20,
+                        "total": 20,
+                        "done": True,
+                    }
+                ),
+            ]
+        )
+
+        with patch.object(httpx.Client, "stream", return_value=context):
+            with OllamaClient() as client:
+                events = list(
+                    client.stream_generate_events(
+                        "flux",
+                        "a mountain landscape",
+                        width=512,
+                        height=512,
+                        steps=20,
+                    )
+                )
+
+        progress = [event for event in events if event.event == "progress"]
+        images = [event for event in events if event.event == "image"]
+        assert len(progress) >= 1
+        assert progress[0].completed == 5
+        assert progress[0].total == 20
+        assert len(images) == 1
+        assert images[0].image == "base64data"
+        assert events[-1].event == "done"
+
     def test_chat_events_with_tool_call(self) -> None:
         context = _stream_context(
             [

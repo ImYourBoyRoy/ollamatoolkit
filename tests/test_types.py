@@ -141,6 +141,19 @@ class TestGenerateRequest:
         assert data["model"] == "llama2"
         assert data["stream"] is True
 
+    def test_image_generation_params(self):
+        req = GenerateRequest(
+            model="flux",
+            prompt="a sunset",
+            width=512,
+            height=512,
+            steps=20,
+        )
+        data = req.model_dump(exclude_none=True)
+        assert data["width"] == 512
+        assert data["height"] == 512
+        assert data["steps"] == 20
+
 
 class TestGenerateResponse:
     """Test GenerateResponse model."""
@@ -154,6 +167,18 @@ class TestGenerateResponse:
         )
         assert resp.response == "Hello back!"
         assert resp.done is True
+
+    def test_image_generation_response(self):
+        resp = GenerateResponse(
+            model="flux",
+            image="base64imagedata",
+            completed=10,
+            total=20,
+            done=False,
+        )
+        assert resp.image == "base64imagedata"
+        assert resp.completed == 10
+        assert resp.total == 20
 
 
 class TestChatRequest:
