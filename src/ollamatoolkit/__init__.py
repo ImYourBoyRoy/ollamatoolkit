@@ -12,7 +12,7 @@ Quick Start:
     response = client.generate("llama2", "Hello!")
 """
 
-__version__ = "0.2.4"
+from ollamatoolkit._version import __version__
 
 # Core Components
 from .agents.simple import SimpleAgent, AgentHooks
