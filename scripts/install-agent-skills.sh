@@ -5,7 +5,7 @@
 # Usage:
 #   ./scripts/install-agent-skills.sh --agent all
 #   ./scripts/install-agent-skills.sh --agent cursor --scope project
-#   ./scripts/install-agent-skills.sh --repo-url https://github.com/imyourboyroy/ollamatoolkit
+#   ./scripts/install-agent-skills.sh --repo-url https://github.com/imyourboyroy/pyenv-native
 #
 set -euo pipefail
 
@@ -95,15 +95,27 @@ install_kiro() {
 }
 
 install_gemini() {
+  local scope_args=()
+  if [[ "$SCOPE" == "project" ]]; then
+    scope_args=(--scope workspace)
+  fi
   if command -v gemini >/dev/null 2>&1; then
-    if [[ "$SCOPE" == "project" ]]; then
-      gemini skills install "$REPO_ROOT/skills/" --scope workspace
+    if [[ -n "$REPO_URL" ]]; then
+      local url="$REPO_URL"
+      [[ "$url" == *.git ]] || url="${url}.git"
+      gemini skills install "$url" --path skills "${scope_args[@]}"
     else
-      gemini skills install "$REPO_ROOT/skills/"
+      gemini skills install "$REPO_ROOT/skills/" "${scope_args[@]}"
     fi
   else
     echo "  Gemini CLI: 'gemini' not in PATH — manual:"
-    echo "    gemini skills install $REPO_ROOT/skills/"
+    if [[ -n "$REPO_URL" ]]; then
+      local url="$REPO_URL"
+      [[ "$url" == *.git ]] || url="${url}.git"
+      echo "    gemini skills install $url --path skills ${scope_args[*]}"
+    else
+      echo "    gemini skills install $REPO_ROOT/skills/ ${scope_args[*]}"
+    fi
   fi
 }
 
@@ -190,4 +202,3 @@ else
 fi
 
 echo "Done. See docs/agent-skills/README.md for per-agent details."
-

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ollamatoolkit-skills",
+  "description": "Agent skills for ollamatoolkit — local LLM agents on Ollama/LiteLLM.",
+  "owner": {
+    "name": "Roy Dawson IV",
+    "url": "https://github.com/imyourboyroy"
+  },
+  "plugins": [
+    {
+      "name": "ollamatoolkit",
+      "source": {
+        "source": "github",
+        "repo": "imyourboyroy/ollamatoolkit"
+      },
+      "description": "SimpleAgent, OllamaClient, MCPToolManager, and CLI workflows for Python agent systems.",
+      "homepage": "https://github.com/imyourboyroy/ollamatoolkit",
+      "license": "MIT",
+      "keywords": ["ollama", "agents", "litellm", "mcp", "python"]
+    }
+  ]
+}
