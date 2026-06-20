@@ -26,6 +26,37 @@ Import path remains `ollamatoolkit` after installation.
 
 ---
 
+## Agent skills (Cursor, Claude Code, Gemini, Copilot, and more)
+
+### Tell your agent (copy-paste)
+
+```text
+Install the agent skills from https://github.com/imyourboyroy/ollamatoolkit
+```
+
+### Quick install
+
+**Windows (PowerShell 7+):**
+
+```powershell
+git clone --depth 1 https://github.com/imyourboyroy/ollamatoolkit.git
+cd ollamatoolkit
+./scripts/install-agent-skills.ps1 -Agent all
+```
+
+**macOS / Linux:**
+
+```bash
+git clone --depth 1 https://github.com/imyourboyroy/ollamatoolkit.git
+cd ollamatoolkit
+chmod +x ./scripts/install-agent-skills.sh
+./scripts/install-agent-skills.sh --agent all
+```
+
+Per-agent guides: **[docs/agent-skills/README.md](./docs/agent-skills/README.md)**
+
+---
+
 ## Integration Guide
 
 ### 1) Standalone usage (direct Python)

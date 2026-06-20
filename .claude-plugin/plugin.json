@@ -1,0 +1,12 @@
+{
+  "name": "ollamatoolkit",
+  "description": "Agent skills for ollamatoolkit — Ollama agents, tool loops, and MCPToolManager workflows.",
+  "author": {
+    "name": "Roy Dawson IV"
+  },
+  "homepage": "https://github.com/imyourboyroy/ollamatoolkit",
+  "repository": "https://github.com/imyourboyroy/ollamatoolkit",
+  "license": "MIT",
+  "skills": "./skills"
+}
+
